@@ -1,0 +1,9 @@
+{
+  "name": "projek-pak-didin",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "npm --prefix project/apps/bacayuk-admin run dev",
+    "build": "npm --prefix project/apps/bacayuk-admin run build",
+    "install": "npm --prefix project/apps/bacayuk-admin install"
+  }
+}
