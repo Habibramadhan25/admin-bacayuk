@@ -1,0 +1,62 @@
+[
+  {
+    "id": "u1",
+    "username": "andi_juara",
+    "full_name": "Andi Pratama",
+    "email": "andi@sekolah.id",
+    "password_hash": "ab9807182393c1cf27258c50f9d1392fa8fb699076ad80ddffd4310becf0aafc",
+    "password": "password123",
+    "school": "SMP Juara Bangsa",
+    "avatar_url": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80",
+    "reading_goal_books": 25,
+    "booksRead": 18
+  },
+  {
+    "id": "u_rafli",
+    "username": "rafli",
+    "full_name": "Rafli",
+    "email": "rafli@example.com",
+    "password_hash": "ab9807182393c1cf27258c50f9d1392fa8fb699076ad80ddffd4310becf0aafc",
+    "password": "password123",
+    "school": "SMP Juara Bangsa",
+    "avatar_url": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80",
+    "reading_goal_books": 20,
+    "booksRead": 8
+  },
+  {
+    "id": "u_1793929400305",
+    "username": "siswa_baru",
+    "full_name": "Siswa Baru Belajar",
+    "email": "siswabaru@sekolah.id",
+    "password_hash": "ab9807182393c1cf27258c50f9d1392fa8fb699076ad80ddffd4310becf0aafc",
+    "password": "password123",
+    "school": "SMP Negeri 1",
+    "avatar_url": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80",
+    "reading_goal_books": 20,
+    "booksRead": 0
+  },
+  {
+    "id": "u_1793929604376",
+    "username": "habib2025",
+    "full_name": "habib ramadhan",
+    "email": "habib2025@sekolah.id",
+    "password_hash": "3f0166849e2eb28520621a998af0662864a5393c5e6b79d538fc9ce24ee4da02",
+    "password": "HABIB2026",
+    "school": "SMP Juara Bangsa",
+    "avatar_url": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80",
+    "reading_goal_books": 20,
+    "booksRead": 0
+  },
+  {
+    "id": "u_1793935828040",
+    "username": "habib25",
+    "full_name": "HABIB RAMADHAN",
+    "email": "habib25@sekolah.id",
+    "password_hash": "010d7b783ac675deb8c13b91a11011bd1113a106fb25e3bad7189120f58cca81",
+    "password": "HABIB26",
+    "school": "SMP Juara Bangsa",
+    "avatar_url": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80",
+    "reading_goal_books": 20,
+    "booksRead": 0
+  }
+]

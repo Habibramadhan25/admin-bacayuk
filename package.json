@@ -1,0 +1,15 @@
+{
+  "name": "bacayuk-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix admin--main run dev",
+    "dev:all": "npm --prefix admin--main run dev:all",
+    "dev:admin": "npm --prefix admin--main run dev:admin",
+    "dev:mobile": "npm --prefix admin--main run dev:mobile",
+    "dev:server": "npm --prefix admin--main run dev:server",
+    "db:init": "npm --prefix admin--main run db:init",
+    "build": "npm --prefix admin--main run build",
+    "lint": "npm --prefix admin--main run lint"
+  }
+}
