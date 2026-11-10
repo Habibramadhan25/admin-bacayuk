@@ -18,6 +18,29 @@ const Users = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
+    // Ambil daftar pengguna terdaftar dari backend jika tersedia
+    fetch('/api/auth/users')
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && Array.isArray(json.data)) {
+          setUsers((prev) => {
+            const map = new Map<string, User>();
+            prev.forEach((u) => map.set(u.id, u));
+            json.data.forEach((u: any) => {
+              if (!map.has(u.id)) {
+                map.set(u.id, u);
+              }
+            });
+            const merged = Array.from(map.values());
+            try {
+              localStorage.setItem('bacayuk_users', JSON.stringify(merged));
+            } catch {}
+            return merged;
+          });
+        }
+      })
+      .catch(() => {});
+
     const handleStorage = () => {
       try {
         const raw = localStorage.getItem('bacayuk_users');

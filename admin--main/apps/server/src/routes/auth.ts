@@ -314,4 +314,28 @@ router.post('/login', async (req: Request, res: Response) => {
   }
 });
 
+// Endpoint untuk mendapatkan daftar seluruh akun siswa terdaftar
+router.get('/users', (_req, res) => {
+  try {
+    const localUsers = getStoredUsers();
+    return res.json({
+      success: true,
+      data: localUsers.map((u) => ({
+        id: u.id,
+        name: u.full_name || u.username,
+        username: u.username,
+        email: u.email || `${u.username}@sekolah.id`,
+        school: u.school,
+        avatar: u.avatar_url,
+        joinDate: '2026-11-10T08:00:00Z',
+        status: 'Active',
+        booksRead: u.booksRead || 0,
+        booksCompleted: 0,
+      })),
+    });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 export default router;

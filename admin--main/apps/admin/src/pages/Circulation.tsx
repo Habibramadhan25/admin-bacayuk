@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Repeat, 
   Plus, 
@@ -53,7 +53,7 @@ export const Circulation: React.FC = () => {
     }
   });
 
-  const [users] = useState<User[]>(() => {
+  const [users, setUsers] = useState<User[]>(() => {
     try {
       const data = localStorage.getItem('bacayuk_users');
       return data ? JSON.parse(data) : initialUsers;
@@ -61,6 +61,58 @@ export const Circulation: React.FC = () => {
       return initialUsers;
     }
   });
+
+  // Sinkronisasi otomatis data akun siswa terdaftar dari server & local storage
+  useEffect(() => {
+    const refreshUsers = () => {
+      try {
+        const data = localStorage.getItem('bacayuk_users');
+        if (data) setUsers(JSON.parse(data));
+      } catch {}
+    };
+
+    // Ambil daftar pengguna terdaftar dari backend jika tersedia
+    fetch('/api/auth/users')
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && Array.isArray(json.data)) {
+          setUsers((prev) => {
+            const map = new Map<string, User>();
+            prev.forEach((u) => map.set(u.id, u));
+            json.data.forEach((u: any) => {
+              if (!map.has(u.id)) {
+                map.set(u.id, u);
+              }
+            });
+            const merged = Array.from(map.values());
+            try {
+              localStorage.setItem('bacayuk_users', JSON.stringify(merged));
+            } catch {}
+            return merged;
+          });
+        }
+      })
+      .catch(() => {});
+
+    window.addEventListener('storage', refreshUsers);
+    window.addEventListener('bacayuk_users_updated', refreshUsers);
+
+    const unsub = realtime.subscribe((event) => {
+      if (
+        event.type === 'USER_REGISTERED' ||
+        event.type === 'USER_JOINED' ||
+        event.type === 'USERS_UPDATED'
+      ) {
+        refreshUsers();
+      }
+    });
+
+    return () => {
+      window.removeEventListener('storage', refreshUsers);
+      window.removeEventListener('bacayuk_users_updated', refreshUsers);
+      unsub();
+    };
+  }, []);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'All' | 'Dipinjam' | 'Terlambat' | 'Dikembalikan'>('All');
@@ -231,7 +283,13 @@ export const Circulation: React.FC = () => {
         </div>
 
         <button
-          onClick={() => setShowBorrowModal(true)}
+          onClick={() => {
+            try {
+              const raw = localStorage.getItem('bacayuk_users');
+              if (raw) setUsers(JSON.parse(raw));
+            } catch {}
+            setShowBorrowModal(true);
+          }}
           className="flex items-center gap-2 px-5 py-2.5 bg-[#3a2012] hover:bg-[#2a160b] text-[#f9f6f0] text-xs font-bold rounded-xl transition-all shadow-sm hover:shadow-md active:scale-98"
         >
           <Plus className="w-4 h-4" />

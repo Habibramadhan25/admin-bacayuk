@@ -177,6 +177,7 @@ export const Reports: React.FC = () => {
   const [importFileName, setImportFileName] = useState<string>('');
   const [importError, setImportError] = useState<string | null>(null);
   const [importSuccess, setImportSuccess] = useState<string | null>(null);
+  const [exportAlert, setExportAlert] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Helper filter data berdasarkan periode yang dipilih
@@ -244,7 +245,8 @@ export const Reports: React.FC = () => {
     format: 'xlsx' | 'csv' | 'json'
   ) => {
     if (!data.length) {
-      alert('Tidak ada data yang sesuai dengan filter periode ini untuk diekspor.');
+      setExportAlert('Tidak ada data yang sesuai dengan filter periode ini untuk diekspor.');
+      setTimeout(() => setExportAlert(null), 5000);
       return;
     }
 
@@ -593,6 +595,54 @@ export const Reports: React.FC = () => {
       setImportSuccess(`Berhasil mengimpor ${newUsers.length} akun siswa ke sistem!`);
       setImportParsedRows([]);
       setImportFileName('');
+    } else if (importTarget === 'loans') {
+      const newLoans: CirculationLoan[] = importParsedRows.map((r, i) => {
+        const bookTitle = r.Judul_Buku || r.Judul || r.bookTitle || `Buku Pinjaman #${i + 1}`;
+        const userName = r.Nama_Siswa || r.Nama || r.userName || `Siswa #${i + 1}`;
+        const userEmail = r.Email_Siswa || r.Email || r.userEmail || `${userName.toLowerCase().replace(/\s+/g, '')}@sekolah.id`;
+        const borrowDate = (importDateMode === 'file' && (r.Tanggal_Pinjam || r.borrowDate))
+          ? String(r.Tanggal_Pinjam || r.borrowDate).slice(0, 10)
+          : resolvedDate;
+        const dueDate = (r.Batas_Kembali || r.Jatuh_Tempo || r.dueDate)
+          ? String(r.Batas_Kembali || r.Jatuh_Tempo || r.dueDate).slice(0, 10)
+          : new Date(new Date(borrowDate).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        const status = (r.Status === 'Terlambat' || r.Status === 'Dikembalikan') ? r.Status : 'Dipinjam';
+
+        return {
+          id: `ln_imp_${Date.now()}_${i}`,
+          bookId: `b_imp_${i}`,
+          bookTitle,
+          bookCover: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=300',
+          userId: `u_imp_${i}`,
+          userName,
+          userEmail,
+          borrowDate,
+          dueDate,
+          returnDate: status === 'Dikembalikan' ? dueDate : null,
+          status: status as any,
+          fineAmount: Number(r.Denda || r.fineAmount) || 0,
+          notes: r.Catatan || r.notes || `Data peminjaman diimpor ke sistem.`
+        };
+      });
+
+      const updatedLoans = [...newLoans, ...loans];
+      setLoans(updatedLoans);
+      localStorage.setItem('bacayuk_circulation', JSON.stringify(updatedLoans));
+      localStorage.setItem('bacayuk_loans', JSON.stringify(updatedLoans));
+
+      realtime.publish('LOAN_CREATED', { loans: updatedLoans });
+      window.dispatchEvent(new Event('bacayuk_circulation_updated'));
+
+      AdminNotificationStorage.addNotification({
+        type: 'CIRCULATION',
+        title: 'Impor Peminjaman Berhasil',
+        message: `${newLoans.length} data peminjaman sirkulasi berhasil diimpor (${getHumanPeriodLabel()}).`,
+        targetUrl: '/circulation',
+      });
+
+      setImportSuccess(`Berhasil mengimpor ${newLoans.length} data peminjaman sirkulasi ke sistem!`);
+      setImportParsedRows([]);
+      setImportFileName('');
     }
   };
 
@@ -623,8 +673,41 @@ export const Reports: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Kop Surat Dokumen Resmi saat Dicetak / PDF */}
+      <div className="hidden print:block pb-4 mb-4 border-b-2 border-[#2a160b]">
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-xl font-bold font-serif text-black uppercase tracking-wide">
+              Perpustakaan Digital BacaYuk
+            </h1>
+            <p className="text-xs text-gray-700">Laporan Resmi Sirkulasi, Pengguna & Aktivitas Membaca Siswa</p>
+            <p className="text-xs font-semibold text-gray-900 mt-1">
+              Periode Laporan: {getHumanPeriodLabel()}
+            </p>
+          </div>
+          <div className="text-right text-[11px] text-gray-600">
+            <p>Dicetak: {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
+            <p>Pukul: {new Date().toLocaleTimeString('id-ID')} WIB</p>
+            <p className="text-emerald-700 font-bold mt-1">Status: Terverifikasi Sistem</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Banner Notifikasi Peringatan Ekspor */}
+      {exportAlert && (
+        <div className="p-4 bg-amber-50 border border-amber-300 rounded-2xl flex items-center justify-between text-xs text-amber-900 font-bold animate-in fade-in print:hidden">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-5 h-5 text-amber-600" />
+            <span>{exportAlert}</span>
+          </div>
+          <button onClick={() => setExportAlert(null)} className="text-amber-700 hover:text-amber-900">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Header Utama & Pilihan Tab */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden">
         <div>
           <h1 className="text-2xl font-black font-serif text-[#2a160b] flex items-center gap-2">
             <FileBarChart className="w-7 h-7 text-[#8a6d1c]" />
@@ -639,7 +722,7 @@ export const Reports: React.FC = () => {
           {/* Tombol Cetak Dokumen PDF Resmi */}
           <button
             onClick={() => window.print()}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-white border border-[#d4c3a3] hover:bg-[#ebdcb8] text-[#3a2012] text-xs font-bold rounded-xl transition-all shadow-2xs"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-white border border-[#d4c3a3] hover:bg-[#ebdcb8] text-[#3a2012] text-xs font-bold rounded-xl transition-all shadow-2xs cursor-pointer"
             title="Cetak atau Simpan sebagai PDF"
           >
             <Printer className="w-4 h-4 text-[#8a6d1c]" />
@@ -650,7 +733,7 @@ export const Reports: React.FC = () => {
           <div className="flex bg-[#ebdcb8] p-1 rounded-xl border border-[#d4c3a3]">
             <button
               onClick={() => setActiveReportTab('export')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeReportTab === 'export'
                   ? 'bg-[#3a2012] text-[#f9f6f0] shadow-sm'
                   : 'text-[#5a3a22] hover:text-[#2a160b]'
@@ -661,7 +744,7 @@ export const Reports: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveReportTab('import')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeReportTab === 'import'
                   ? 'bg-[#3a2012] text-[#f9f6f0] shadow-sm'
                   : 'text-[#5a3a22] hover:text-[#2a160b]'
@@ -672,7 +755,7 @@ export const Reports: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveReportTab('retention')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeReportTab === 'retention'
                   ? 'bg-[#3a2012] text-[#f9f6f0] shadow-sm'
                   : 'text-[#5a3a22] hover:text-[#2a160b]'
@@ -708,7 +791,7 @@ export const Reports: React.FC = () => {
           </div>
 
           {/* Opsi Pilihan Mode Periode */}
-          <div className="flex items-center flex-wrap gap-1.5 bg-[#ebdcb8]/60 p-1 rounded-xl border border-[#d4c3a3]">
+          <div className="flex items-center flex-wrap gap-1.5 bg-[#ebdcb8]/60 p-1 rounded-xl border border-[#d4c3a3] print:hidden">
             <button
               onClick={() => setPeriodMode('all')}
               className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors ${
@@ -760,7 +843,7 @@ export const Reports: React.FC = () => {
 
         {/* Input Spesifik Sesuai Pilihan Mode Periode */}
         <div className="pt-2 border-t border-[#d4c3a3]/60 flex flex-wrap items-center justify-between gap-4 text-xs">
-          <div className="flex items-center flex-wrap gap-3">
+          <div className="flex items-center flex-wrap gap-3 print:hidden">
             {periodMode === 'date' && (
               <div className="flex items-center gap-2">
                 <span className="font-bold text-[#2a160b]">Pilih Tanggal:</span>
@@ -1486,7 +1569,7 @@ export const Reports: React.FC = () => {
               {/* Pilihan Target Data */}
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-[#2a160b]">Kategori Data yang Diimpor:</label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   <button
                     onClick={() => {
                       setImportTarget('books');
@@ -1498,7 +1581,7 @@ export const Reports: React.FC = () => {
                         : 'bg-white text-[#3a2012] border-[#d4c3a3] hover:bg-[#ebdcb8]'
                     }`}
                   >
-                    📚 Katalog Buku
+                    📚 Buku
                   </button>
                   <button
                     onClick={() => {
@@ -1511,7 +1594,20 @@ export const Reports: React.FC = () => {
                         : 'bg-white text-[#3a2012] border-[#d4c3a3] hover:bg-[#ebdcb8]'
                     }`}
                   >
-                    👥 Data Siswa
+                    👥 Siswa
+                  </button>
+                  <button
+                    onClick={() => {
+                      setImportTarget('loans');
+                      setImportParsedRows([]);
+                    }}
+                    className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center ${
+                      importTarget === 'loans'
+                        ? 'bg-[#8a6d1c] text-white border-[#8a6d1c]'
+                        : 'bg-white text-[#3a2012] border-[#d4c3a3] hover:bg-[#ebdcb8]'
+                    }`}
+                  >
+                    🔄 Sirkulasi
                   </button>
                 </div>
               </div>
@@ -1769,7 +1865,10 @@ export const Reports: React.FC = () => {
                     <XAxis dataKey="category" tick={{ fill: '#8a6d1c', fontSize: 11, fontWeight: 'bold' }} />
                     <YAxis tick={{ fill: '#8a6d1c', fontSize: 11 }} unit="%" />
                     <Tooltip
-                      formatter={(val) => [`${val}%`, '']}
+                      formatter={(val: any, name: any) => [
+                        `${val}%`,
+                        name === 'tamat' || name === 'Selesai Tamat (%)' ? 'Selesai Tamat' : 'Ditinggalkan di Jalan'
+                      ]}
                       contentStyle={{ backgroundColor: '#f9f6f0', borderRadius: '8px', border: '1px solid #d4c3a3', fontWeight: 'bold' }}
                     />
                     <Bar dataKey="tamat" name="Selesai Tamat (%)" fill="#8a6d1c" radius={[4, 4, 0, 0]} />

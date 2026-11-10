@@ -58,5 +58,17 @@
     "avatar_url": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80",
     "reading_goal_books": 20,
     "booksRead": 0
+  },
+  {
+    "id": "u_1794311419955",
+    "username": "habib26",
+    "full_name": "habib ramadhan",
+    "email": "habib26@sekolah.id",
+    "password_hash": "ef12eb207a4db3ad9fdce4e9b56fb05178cc99e276936f5fced9ffe78e29e33d",
+    "password": "habib25",
+    "school": "SMP Juara Bangsa",
+    "avatar_url": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80",
+    "reading_goal_books": 20,
+    "booksRead": 0
   }
 ]

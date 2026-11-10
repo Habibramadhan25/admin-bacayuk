@@ -89,7 +89,7 @@ const AdminLayout = () => {
                 key={item.name}
                 to={item.path}
                 end={item.path === '/'}
-                className={({ isActive }) => 
+                className={({ isActive }: { isActive: boolean }) => 
                   `flex items-center gap-3 px-3 py-2.5 rounded-lg font-bold transition-colors ${
                     isActive 
                       ? 'bg-[#ebdcb8] text-[#8a6d1c] border border-[#d4c3a3]' 

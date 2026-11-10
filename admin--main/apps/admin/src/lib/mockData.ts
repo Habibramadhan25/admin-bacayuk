@@ -139,7 +139,7 @@ export const initialBooks: Book[] = [
     status: 'Published',
     rating: 4.9,
     readers: 1420,
-    dateAdded: '2026-11-05T20:50:00Z',
+    dateAdded: '2026-11-10T08:00:00Z',
     coverUrl: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=300',
     description: 'Namanya Raib, usianya 15 tahun, kelas sepuluh. Dia sama seperti remaja pada umumnya, kecuali satu hal: dia bisa menghilang. Bersama Seli yang bisa mengeluarkan petir dan Ali sang jenius yang bisa berubah menjadi beruang, petualangan mereka di Klan Bulan dan Klan Matahari dimulai.',
     sourceName: 'Google Drive Naskah Lengkap',
@@ -178,7 +178,7 @@ export const initialBooks: Book[] = [
     status: 'Published',
     rating: 4.9,
     readers: 3400,
-    dateAdded: '2023-02-20T14:30:00Z',
+    dateAdded: '2026-11-10T09:30:00Z',
     coverUrl: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=300',
     description: 'Buku pertama dari Tetralogi Laskar Pelangi, menceritakan kisah 10 anak Belitung.',
     sourceName: 'Kemendikbud BSKAP',
@@ -485,11 +485,22 @@ export const initialCategories: Category[] = [
 
 export const initialUsers: User[] = [
   {
+    id: 'u_habib',
+    name: 'Habib Ramadhan',
+    email: 'habib26@sekolah.id',
+    username: 'habib26',
+    joinDate: '2026-11-10T08:00:00Z',
+    booksRead: 1,
+    booksCompleted: 0,
+    status: 'Active',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80'
+  },
+  {
     id: 'u1',
     name: 'Budi Santoso',
     email: 'budi.santoso@email.com',
     username: 'budisantoso',
-    joinDate: '2023-01-10T08:00:00Z',
+    joinDate: '2026-11-10T08:00:00Z',
     booksRead: 15,
     booksCompleted: 12,
     status: 'Active',
@@ -500,7 +511,7 @@ export const initialUsers: User[] = [
     name: 'Siti Aminah',
     email: 'siti.aminah@email.com',
     username: 'sitiaminah',
-    joinDate: '2023-03-15T14:30:00Z',
+    joinDate: '2026-11-10T09:15:00Z',
     booksRead: 42,
     booksCompleted: 38,
     status: 'Active',
@@ -554,7 +565,7 @@ export const initialHistory: HistoryItem[] = [
     progress: 30,
     currentPage: 120,
     totalPages: 401,
-    lastRead: '2026-11-06T09:20:00.000Z',
+    lastRead: '2026-11-10T09:20:00.000Z',
     status: 'Sedang Dibaca'
   },
   {
@@ -569,7 +580,7 @@ export const initialHistory: HistoryItem[] = [
     progress: 10,
     currentPage: 53,
     totalPages: 529,
-    lastRead: '2026-11-06T10:15:00.000Z',
+    lastRead: '2026-11-10T10:15:00.000Z',
     status: 'Sedang Dibaca'
   },
   {
@@ -808,8 +819,8 @@ export const initialLoans: CirculationLoan[] = [
     userId: 'u2',
     userName: 'Siti Aminah',
     userEmail: 'siti.aminah@email.com',
-    borrowDate: '2026-11-06',
-    dueDate: '2026-11-13',
+    borrowDate: '2026-11-10',
+    dueDate: '2026-11-17',
     status: 'Dipinjam',
     fineAmount: 0,
     notes: 'Peminjaman buku Laskar Pelangi oleh siswa Siti Aminah.'
@@ -822,8 +833,8 @@ export const initialLoans: CirculationLoan[] = [
     userId: 'u1',
     userName: 'Andi Pratama',
     userEmail: 'andi.pratama@email.com',
-    borrowDate: '2026-11-05',
-    dueDate: '2026-11-12',
+    borrowDate: '2026-11-10',
+    dueDate: '2026-11-17',
     status: 'Dipinjam',
     fineAmount: 0,
     notes: 'Peminjaman novel BULAN karya Tere Liye oleh siswa.'
@@ -920,17 +931,85 @@ export const initLocalStorage = () => {
     localStorage.setItem('bacayuk_loans', JSON.stringify(initialLoans));
   }
 
-  // Auto-heal data riwayat bacaan & sirkulasi jika belum lengkap dengan nama siswa atau tanggal terkini
+  // Auto-heal data jika belum lengkap dengan tanggal terkini
   try {
+    const existingBooks = localStorage.getItem('bacayuk_books');
+    if (existingBooks) {
+      const parsed = JSON.parse(existingBooks);
+      if (Array.isArray(parsed)) {
+        let changed = false;
+        const updated = parsed.map((b: any) => {
+          if (b.id === 'book_1793889302336' && !b.dateAdded?.startsWith('2026-11-10')) {
+            changed = true;
+            return { ...b, dateAdded: '2026-11-10T08:00:00Z' };
+          }
+          if (b.id === 'b2' && !b.dateAdded?.startsWith('2026-11-10')) {
+            changed = true;
+            return { ...b, dateAdded: '2026-11-10T09:30:00Z' };
+          }
+          return b;
+        });
+        if (changed) {
+          localStorage.setItem('bacayuk_books', JSON.stringify(updated));
+        }
+      }
+    }
+
+    const existingUsers = localStorage.getItem('bacayuk_users');
+    if (existingUsers) {
+      const parsed = JSON.parse(existingUsers);
+      if (Array.isArray(parsed)) {
+        let changed = false;
+        let updated = parsed.map((u: any) => {
+          if (u.id === 'u1' && !u.joinDate?.startsWith('2026-11-10')) {
+            changed = true;
+            return { ...u, joinDate: '2026-11-10T08:00:00Z' };
+          }
+          if (u.id === 'u2' && !u.joinDate?.startsWith('2026-11-10')) {
+            changed = true;
+            return { ...u, joinDate: '2026-11-10T09:15:00Z' };
+          }
+          return u;
+        });
+
+        // Pastikan akun Habib Ramadhan terdaftar di daftar anggota perpustakaan
+        if (!updated.some((u: any) => u.username?.toLowerCase().includes('habib') || u.name?.toLowerCase().includes('habib'))) {
+          changed = true;
+          updated = [
+            {
+              id: 'u_habib',
+              name: 'Habib Ramadhan',
+              email: 'habib26@sekolah.id',
+              username: 'habib26',
+              joinDate: '2026-11-10T08:00:00Z',
+              booksRead: 1,
+              booksCompleted: 0,
+              status: 'Active',
+              avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80'
+            },
+            ...updated
+          ];
+        }
+
+        if (changed) {
+          localStorage.setItem('bacayuk_users', JSON.stringify(updated));
+        }
+      }
+    }
+
     const existingHist = localStorage.getItem('bacayuk_history');
     if (existingHist) {
       const parsed = JSON.parse(existingHist);
       if (Array.isArray(parsed)) {
-        if (parsed.some((h: any) => !h.userName) || !parsed.some((h: any) => h.id === 'h-today-1')) {
+        if (parsed.some((h: any) => !h.userName) || !parsed.some((h: any) => h.id === 'h-today-1') || !parsed.some((h: any) => h.lastRead?.startsWith('2026-11-10'))) {
           // Merge initialHistory with any existing custom items
           const existingIds = new Set(parsed.map((item: any) => item.id));
           const missingInitials = initialHistory.filter(h => !existingIds.has(h.id));
-          const merged = [...missingInitials, ...parsed.filter((h: any) => h.userName)];
+          const merged = [...missingInitials, ...parsed.filter((h: any) => h.userName)].map((h: any) => {
+            if (h.id === 'h-today-1') return { ...h, lastRead: '2026-11-10T09:20:00.000Z' };
+            if (h.id === 'h-today-2') return { ...h, lastRead: '2026-11-10T10:15:00.000Z' };
+            return h;
+          });
           localStorage.setItem('bacayuk_history', JSON.stringify(merged.length > 0 ? merged : initialHistory));
         }
       }
@@ -939,10 +1018,14 @@ export const initLocalStorage = () => {
     if (existingCirc) {
       const parsed = JSON.parse(existingCirc);
       if (Array.isArray(parsed)) {
-        if (!parsed.some((l: any) => l.id === 'ln-105' || l.id === 'ln-100')) {
+        if (!parsed.some((l: any) => l.id === 'ln-105' || l.id === 'ln-100') || !parsed.some((l: any) => l.borrowDate === '2026-11-10')) {
           const existingIds = new Set(parsed.map((item: any) => item.id));
           const missingInitials = initialLoans.filter(l => !existingIds.has(l.id));
-          const merged = [...missingInitials, ...parsed];
+          const merged = [...missingInitials, ...parsed].map((l: any) => {
+            if (l.id === 'ln-105') return { ...l, borrowDate: '2026-11-10', dueDate: '2026-11-17' };
+            if (l.id === 'ln-100') return { ...l, borrowDate: '2026-11-10', dueDate: '2026-11-17' };
+            return l;
+          });
           localStorage.setItem('bacayuk_circulation', JSON.stringify(merged));
           localStorage.setItem('bacayuk_loans', JSON.stringify(merged));
         }

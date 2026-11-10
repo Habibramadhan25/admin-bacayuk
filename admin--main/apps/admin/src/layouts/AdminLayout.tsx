@@ -125,7 +125,7 @@ const AdminLayout = () => {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#f9f6f0] border-r border-[#d4c3a3] transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#f9f6f0] border-r border-[#d4c3a3] transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 print:hidden ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="h-full flex flex-col">
           <div className="h-16 flex items-center px-6 border-b border-[#d4c3a3]">
             <div className="flex items-center gap-2 text-[#3a2012] font-black font-serif text-2xl">
@@ -146,7 +146,7 @@ const AdminLayout = () => {
                 key={item.name}
                 to={item.path}
                 end={item.path === '/'}
-                className={({ isActive }) => 
+                className={({ isActive }: { isActive: boolean }) => 
                   `flex items-center gap-3 px-3 py-2.5 rounded-lg font-bold transition-colors ${
                     isActive 
                       ? 'bg-[#ebdcb8] text-[#8a6d1c] border border-[#d4c3a3]' 
@@ -175,7 +175,7 @@ const AdminLayout = () => {
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         {/* Header */}
-        <header className="h-16 bg-[#f9f6f0] border-b border-[#d4c3a3] flex items-center justify-between px-4 lg:px-8 z-10 shrink-0 relative shadow-sm">
+        <header className="h-16 bg-[#f9f6f0] border-b border-[#d4c3a3] flex items-center justify-between px-4 lg:px-8 z-10 shrink-0 relative shadow-sm print:hidden">
           <div className="flex items-center gap-4">
             <button 
               className="lg:hidden text-[#8a6d1c] hover:text-[#3a2012]"
@@ -397,7 +397,7 @@ const AdminLayout = () => {
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-auto p-4 lg:p-8">
+        <div className="flex-1 overflow-auto p-4 lg:p-8 print:p-0 print:overflow-visible">
           <div className="max-w-7xl mx-auto page-transition-enter-active">
             <Outlet />
           </div>
