@@ -1,0 +1,20 @@
+{
+  "name": "bacayuk",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:mobile": "npm --prefix apps/mobile start",
+    "dev:server": "npm --prefix apps/server dev",
+    "db:init": "npm --prefix apps/server db:init",
+    "build": "turbo run build",
+    "lint": "turbo run lint"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "typescript": "^5.1.3"
+  }
+}
